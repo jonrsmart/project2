@@ -3,66 +3,57 @@ from flask import Flask, json, url_for
 from flask import render_template
 from flask_cors import CORS, cross_origin
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 from geojson import Point, MultiPoint
 import jinja2
 import json
 from pprint import pprint
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///schools.sqlite3'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///static/data/data_analysts.db'
 db = SQLAlchemy(app)
 
 db.Model.metadata.reflect(db.engine)
 
-class School(db.Model):
-    __tablename__ = 'schools-geocoded'
+class Disasters(db.Model):
+    __tablename__ = 'disastersgeo'
     __table_args__ = { 'extend_existing': True }
-    LOC_CODE = db.Column(db.Text, primary_key=True)    
+    Name = db.Column(db.Text, primary_key=True)    
 
-@app.route('/schools/<slug>')
+class Salary(db.Model):
+    __tablename__ = 'salary_info'
+    __table_args__ = { 'extend_existing': True }
+    CBSAFP = db.Column(db.Text, primary_key=True)  
+
+@app.route('/county/<slug>')
 def detail(slug):
-    school = School.query.filter_by(LOC_CODE=slug).first()
-    return render_template("detail.html", school=school)
-
-@app.route('/zip/<zipcode>')
-def zip(zipcode):
-    schools = School.query.filter_by(ZIP=zipcode).all()
-    return render_template("list.html", schools=schools, count=len(schools), location=zipcode)
-
-@app.route('/city/<cityname>')
-def city(cityname):
-    cityname = cityname.replace("-", " ")
-    schools = School.query.filter_by(city=cityname.upper()).all()
-    zipped=[]
-    for school in schools:
-        zipped.append([float(school.longitude),float(school.latitude),school.SCHOOLNAME])
-    return render_template("list.html", schools=schools, count=len(schools), location=cityname, zipped=zipped)
+    slug = slug.replace("-", " ")
+    slug = slug.title()
+    print(slug)
+    county2 = Disasters.query.filter_by(Name=slug).first()
+    fips = Disasters.query.filter_by(Name=slug).first().fips_total
+    print(fips)
+    disasters = Disasters.query.filter_by(Name=slug).first().numDisasters
+    result = Salary.query.filter_by(CBSAFP=fips).with_entities(func.sum(Salary.tot_emp).label("TotalEmployed")).first()
+    total = result.TotalEmployed
+    print(county2)
+    return render_template("detail.html", county=slug, disasters=disasters, total=total)
 
 @app.route("/")
 def index():
-    
-    return render_template("index.html")
+    counties = Disasters.query.with_entities(Disasters.Name).distinct().all()
+    counties = [county[0].title() for county in counties]
+    counties = sorted(list(set(counties)))
+    result = Salary.query.with_entities(func.sum(Salary.tot_emp).label("TotalEmployed")).first()
+    total = int(result.TotalEmployed)
+    return render_template("index.html", counties=counties, total=total)
 
-@app.route('/city')
-def city_list():
-    # Get the unique city values from the database
-    cities = School.query.with_entities(School.city).distinct().all()
-    # ...more notes I'm hiding...
-    # Convert to titlecase while we're pulling out of the weird list thing
-    cities = [city[0].title() for city in cities]
-    # Now that they're both "New York," we can now dedupe and sort
-    cities = sorted(list(set(cities)))
-    return render_template("cities.html", cities=cities)
-
-@app.route('/zipcode')
-def zip_list():
-    # Get the unique city values from the database
-    zipcodes = School.query.with_entities(School.zipcode).distinct().all()
-    # They're in a weird list of one-element lists, though, like
-    # [['Yonkers'],['Brooklyn'],['Manhattan']]
-    # so we'll take them out of that
-    zipcodes = [zip[0] for zip in zipcodes]
-    return render_template("zipcodes.html", zipcodes=zipcodes)
+@app.route('/county')
+def county_list():
+    counties = Disasters.query.with_entities(Disasters.Name).distinct().all()
+    counties = [county[0].title() for county in counties]
+    counties = sorted(list(set(counties)))
+    return render_template("cities.html", counties=counties)
 
 if __name__ == '__main__':
     app.run(debug=True)

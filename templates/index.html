@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 {% block headline %}
-  There are 654865 Data Analysts in 
+  There are {{total}} Employed Data Analysts in the USA 
 {% endblock %}
 {% block subhead %}
   It's pretty cool.
@@ -14,7 +14,9 @@
   </div> 
   <div class="col">
     <p>I'm amazed and frankly you should be, too.</p>
-    
+      {% for county in counties %}
+    <p><a href="/county/{{ county.lower().replace(' ', '-') }}">{{ county }}</a></p>
+  {% endfor %}
   </div>
    
 </div>
