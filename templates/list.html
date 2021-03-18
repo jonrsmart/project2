@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+{% block headline %}
+  There are {{ "{:,}".format(count) }} schools in {{ location.title() }}
+{% endblock %}
+{% block subhead %}
+  It's pretty cool.
+{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="col">
+    <div id='map' style='width: 800px; height: 500px;'></div>
+    
+  </div> 
+  <div class="col">
+    <p>I'm amazed and frankly you should be, too.</p>
+    {% for school in schools %}
+      <p><a href="/schools/{{ school.LOC_CODE }}">{{ school.SCHOOLNAME }}</a></p>
+    {% endfor %}
+  </div>
+   
+</div>
+<script>
+    L.mapbox.accessToken = 'pk.eyJ1IjoianNtYXJ0NzYiLCJhIjoiY2ttMTczbDhyMDN1ZDJ4anZuZzc5bTY1OCJ9.1vhSKp4Dv-ya0V5yToNhpw';
+    var map = L.mapbox.map('map')
+        .setView([40.71, -74], 9)
+        .addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/streets-v11'));
+    
+    var markers = new L.MarkerClusterGroup();
+    {% for lng, lat, name in zipped %}
+        var title = "{{name}}";
+        var marker = L.marker(new L.LatLng({{lat}}, {{lng}}), {
+            icon: L.mapbox.marker.icon({'marker-symbol': 'school-11.svg', 'marker-color': '0044FF'}),
+            title: title
+        });
+        marker.bindPopup(title);
+        markers.addLayer(marker);
+    {% endfor %}
+    map.addLayer(markers);
+    
+  </script>
+{% endblock %}

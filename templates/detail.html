@@ -1,0 +1,59 @@
+{% extends 'layout.html' %}
+{% block headline %}
+  {{ school.SCHOOLNAME.title() }}
+{% endblock %}
+{% block subhead %}
+  {{ school.ADDRESS.title() }}, {{ school.city.title() }}
+{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="column">
+    <p><strong>School type:</strong> {{ school.SCH_TYPE }}</p>
+    <p></p>
+    <p></p>
+    </div>
+    <div class="column">
+    <div id='map' style='width: 600px; height: 300px;'></div>
+    </div>
+  </div>
+</div>
+<script>
+  L.mapbox.accessToken = 'pk.eyJ1IjoianNtYXJ0NzYiLCJhIjoiY2ttMTczbDhyMDN1ZDJ4anZuZzc5bTY1OCJ9.1vhSKp4Dv-ya0V5yToNhpw';
+  var map = L.mapbox.map('map')
+  .setView([-74, 40.71], 9)
+  .addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/streets-v11'));
+
+  <!-- console.log({{school.longitude}});
+  console.log({{school.latitude}}); -->
+  map.on('load', function() {
+    var geojsonData = {
+      "type": "FeatureCollection",
+      "features": [{
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [{{school.longitude}}, {{school.latitude}}]
+        }
+      }]
+    };
+  console.log(geojsonData);
+  console.log({{school.longitude}});
+  console.log({{school.latitude}});
+    map.addLayer({
+      "id": "points",
+      "type": "circle",
+      "source": {
+        "type": "geojson",
+        "data": geojsonData
+      },
+      "paint": {
+        "circle-radius": 5,
+        "circle-color": "#ECCB2F",
+        "circle-stroke-width": 1,
+        "circle-stroke-color": "black"
+      }
+    })
+  })
+</script>
+{% endblock %}
