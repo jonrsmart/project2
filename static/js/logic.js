@@ -1,30 +1,4 @@
-// Creating map object
-var myMap = L.map("map2").setView([37.8, -96], 4);
-mapboxAccessToken = API_KEY;
-L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=' + mapboxAccessToken, {
-    id: 'mapbox/light-v9',
-    attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
-    tileSize: 512,
-    zoomOffset: -1
-}).addTo(myMap)
-// Adding tile layer
-
-
-// Load in geojson data
-// var geoData = "../../static/data/metro-salary.geojson";
-
-// for (i=0; i<salary_data.features.length; i++){
-//   if (isNaN(salary_data.features[i].properties.a_mean)){
-//     salary_data.features[i].properties.a_mean = 0;
-    
-//   }
-//   else {
-//     salary_data.features[i].properties.a_mean = parseFloat(salary_data.features[i].properties.a_mean);
-//   }
-//   console.log(salary_data.features[i].properties.a_mean);
-// }
-
-var geojson = L.geoJson(salary_data).addTo(myMap);
+var employed = L.geoJson(salary_data);
 
 function getColor(d) {
   return parseFloat(d) > 125000 ? '#800026' :
@@ -47,7 +21,7 @@ function style(feature) {
   };
 }
 
-L.geoJson(salary_data, {style: style}).addTo(myMap);
+employed = L.geoJson(salary_data, {style: style});
 
 function highlightFeature(e) {
   var layer = e.target;
@@ -65,14 +39,14 @@ function highlightFeature(e) {
 }
 
 function resetHighlight(e) {
-  geojson.resetStyle(e.target);
+  employed.resetStyle(e.target);
 }
 
 function zoomToFeature(e) {
   myMap.fitBounds(e.target.getBounds());
 }
 
-function onEachFeature(feature, layer) {
+function salary_feature(feature, layer) {
   layer.on({
       mouseover: highlightFeature,
       mouseout: resetHighlight,
@@ -83,7 +57,53 @@ function onEachFeature(feature, layer) {
         "$" + feature.properties.h_mean + "<hr> Total Employed Data Analysts: " + feature.properties.tot_emp);
 }
 
-geojson = L.geoJson(salary_data, {
+function park_feature(feature, layer) {
+  layer.bindPopup("<h1>Park Name: " + feature.properties.Name + "</h1>");
+  layer.on({
+    click: zoomToFeature
+      });
+  
+}
+
+
+L.MakiMarkers.accessToken = API_KEY;
+var icon = L.MakiMarkers.icon({icon: "park", color: "#5f9120", size: "s"});
+
+var NPMap = L.geoJSON(parks, {
+  onEachFeature: park_feature,
+  pointToLayer: function (feature, latlng) {
+    return L.marker(latlng, {
+      icon: icon })
+    }
+});
+employed = L.geoJson(salary_data, {
   style: style,
-  onEachFeature: onEachFeature
-}).addTo(myMap);
+  onEachFeature: salary_feature 
+});
+
+
+
+var mapboxAccessToken = API_KEY;
+
+var mapboxAttribution = "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>"
+
+var grayscale = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=' + mapboxAccessToken, {id: 'mapbox/light-v10', tileSize: 512, zoomOffset: -1, attribution: mapboxAttribution}),
+    outdoors   = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=' + mapboxAccessToken, {id: 'mapbox/outdoors-v11', tileSize: 512, zoomOffset: -1, attribution: mapboxAttribution});
+
+var myMap = L.map('map2', {
+  center: [37.8, -96],
+  zoom: 4,
+  layers: [grayscale, employed]
+});
+
+var baseMaps = {
+  "Light": grayscale,
+  "Outdoor": outdoors
+};
+
+var overlayMaps = {
+  "Employed": employed,
+  "Parks": NPMap
+};
+
+L.control.layers(baseMaps, overlayMaps).addTo(myMap);

@@ -1,0 +1,168 @@
+{% extends 'layout.html' %}
+{% block headline %}
+  State Information
+{% endblock %}
+{% block content %}
+<div class="container-fluid">
+<div class="row=fluid">
+<div class="col-8 mx-auto">
+  <div id='state_map'></div>
+  </div>
+</div>
+<div class="row-fluid">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>State</th>
+        <th>Abbreviation</th>
+        <th>Latitude</th>
+        <th>Longitude</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for state in states %}
+      <tr id="{{ state.FIPS }}">
+        <td class="row-data">{{state.State}}</td>
+        <td class="row-data">{{state.Initials}}</td>
+        <td class="row-data">{{state.Center_Lat}}</td>
+        <td class="row-data">{{state.Center_Long}}</td>
+        <td><input type="button" 
+                               value="Move Map" 
+                               onclick="show()" /></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </div>
+  </div>
+    <script> 
+    var lat = 37.8, lon = -96, zoom=4;
+            function show() { 
+                var rowId =  
+                    event.target.parentNode.parentNode.id; 
+              //this gives id of tr whose button was clicked 
+                var data = document.getElementById(rowId).querySelectorAll(".row-data");  
+              /*returns array of all elements with  
+              "row-data" class within the row with given id*/ 
+  
+                lat = data[2].innerHTML; 
+                console.log(lat);
+                lon = data[3].innerHTML;
+                console.log(lon);
+                var zoom = 6;
+                myMap.setView(new L.LatLng(lat, lon),6);
+            } 
+
+
+     
+    var employed = L.geoJson(salary_data);
+
+function getColor(d) {
+  return parseFloat(d) > 125000 ? '#800026' :
+  parseFloat(d) > 100000  ? '#BD0026' :
+  parseFloat(d) > 90000  ? '#E31A1C' :
+  parseFloat(d) > 75000  ? '#FC4E2A' :
+  parseFloat(d) > 60000   ? '#FD8D3C' :
+  parseFloat(d) > 45000  ? '#FEB24C' :
+  parseFloat(d) > 30000   ? '#FED976' :
+                    '#FFFFFF';
+}
+function style(feature) {
+  return {
+      fillColor: getColor(feature.properties.a_mean),
+      weight: 2,
+      opacity: 1,
+      color: 'white',
+      dashArray: '3',
+      fillOpacity: 0.7
+  };
+}
+
+employed = L.geoJson(salary_data, {style: style});
+
+function highlightFeature(e) {
+  var layer = e.target;
+
+  layer.setStyle({
+      weight: 5,
+      color: '#666',
+      dashArray: '',
+      fillOpacity: 0.7
+  });
+
+  if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+      layer.bringToFront();
+  }
+}
+
+function resetHighlight(e) {
+  employed.resetStyle(e.target);
+}
+
+function zoomToFeature(e) {
+  myMap.fitBounds(e.target.getBounds());
+}
+
+function salary_feature(feature, layer) {
+  layer.on({
+      mouseover: highlightFeature,
+      mouseout: resetHighlight,
+      click: zoomToFeature
+  });
+  layer.bindPopup("<h1>Area: " + feature.properties.NAME + "</h1><hr><h2>Average Annual Salary: " +
+        "$" + feature.properties.a_mean + "</h2><hr>Average Hourly Wage: " +
+        "$" + feature.properties.h_mean + "<hr> Total Employed Data Analysts: " + feature.properties.tot_emp);
+}
+
+function park_feature(feature, layer) {
+  layer.bindPopup("<h1>Park Name: " + feature.properties.Name + "</h1>");
+  layer.on({
+    click: zoomToFeature
+      });
+  
+}
+
+
+L.MakiMarkers.accessToken = API_KEY;
+var icon = L.MakiMarkers.icon({icon: "park", color: "#5f9120", size: "s"});
+
+var NPMap = L.geoJSON(parks, {
+  onEachFeature: park_feature,
+  pointToLayer: function (feature, latlng) {
+    return L.marker(latlng, {
+      icon: icon })
+    }
+});
+employed = L.geoJson(salary_data, {
+  style: style,
+  onEachFeature: salary_feature 
+});
+
+
+
+var mapboxAccessToken = API_KEY;
+
+var mapboxAttribution = "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>"
+
+var grayscale = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=' + mapboxAccessToken, {id: 'mapbox/light-v10', tileSize: 512, zoomOffset: -1, attribution: mapboxAttribution}),
+    outdoors   = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=' + mapboxAccessToken, {id: 'mapbox/outdoors-v11', tileSize: 512, zoomOffset: -1, attribution: mapboxAttribution});
+
+var myMap = L.map('state_map', {
+  center: [lat, lon],
+  zoom: zoom,
+  layers: [grayscale, employed]
+});
+
+var baseMaps = {
+  "Light": grayscale,
+  "Outdoor": outdoors
+};
+
+var overlayMaps = {
+  "Employed": employed,
+  "Parks": NPMap
+};
+
+L.control.layers(baseMaps, overlayMaps).addTo(myMap);
+        </script> 
+
+{% endblock %}

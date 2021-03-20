@@ -20,40 +20,34 @@ class Disasters(db.Model):
     __table_args__ = { 'extend_existing': True }
     Name = db.Column(db.Text, primary_key=True)    
 
+class States(db.Model):
+    __tablename__ = 'center-states'
+    __table_args__ = { 'extend_existing': True }
+    FIPS = db.Column(db.Float, primary_key=True)  
+
 class Salary(db.Model):
     __tablename__ = 'salary_info'
     __table_args__ = { 'extend_existing': True }
     CBSAFP = db.Column(db.Text, primary_key=True)  
 
-@app.route('/county/<slug>')
+@app.route('/states/<slug>')
 def detail(slug):
-    slug = slug.replace("-", " ")
-    slug = slug.title()
     print(slug)
-    county2 = Disasters.query.filter_by(Name=slug).first()
-    fips = Disasters.query.filter_by(Name=slug).first().fips_total
-    print(fips)
-    disasters = Disasters.query.filter_by(Name=slug).first().numDisasters
-    result = Salary.query.filter_by(CBSAFP=fips).with_entities(func.sum(Salary.tot_emp).label("TotalEmployed")).first()
-    total = result.TotalEmployed
-    print(county2)
-    return render_template("detail.html", county=slug, disasters=disasters, total=total)
+    state = States.query.filter_by(FIPS=slug).first()
+    return render_template("detail.html", state=state)
 
 @app.route("/")
 def index():
-    counties = Disasters.query.with_entities(Disasters.Name).distinct().all()
-    counties = [county[0].title() for county in counties]
-    counties = sorted(list(set(counties)))
+    state_names = States.query.all()
+    print(state_names)
     result = Salary.query.with_entities(func.sum(Salary.tot_emp).label("TotalEmployed")).first()
     total = int(result.TotalEmployed)
-    return render_template("index.html", counties=counties, total=total)
+    return render_template("index.html", states=state_names, total=total)
 
-@app.route('/county')
+@app.route('/states')
 def county_list():
-    counties = Disasters.query.with_entities(Disasters.Name).distinct().all()
-    counties = [county[0].title() for county in counties]
-    counties = sorted(list(set(counties)))
-    return render_template("cities.html", counties=counties)
+    state_names = States.query.all()    
+    return render_template("states.html", states=state_names)
 
 if __name__ == '__main__':
     app.run(debug=True)
