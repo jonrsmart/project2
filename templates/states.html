@@ -22,7 +22,7 @@
     <tbody>
       {% for state in states %}
       <tr id="{{ state.FIPS }}">
-        <td class="row-data">{{state.State}}</td>
+        <td class="row-data"><a href="/states/{{ state.FIPS }}">{{state.State}}</a></td>
         <td class="row-data">{{state.Initials}}</td>
         <td class="row-data">{{state.Center_Lat}}</td>
         <td class="row-data">{{state.Center_Long}}</td>
