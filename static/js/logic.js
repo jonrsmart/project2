@@ -2,7 +2,7 @@ var employed = L.geoJson(salary_data);
 
 function getColor(d) {
   return parseFloat(d) > 125000 ? '#800026' :
-  parseFloat(d) > 100000  ? '#BD0026' :
+  parseFloat(d) > 105000  ? '#BD0026' :
   parseFloat(d) > 90000  ? '#E31A1C' :
   parseFloat(d) > 75000  ? '#FC4E2A' :
   parseFloat(d) > 60000   ? '#FD8D3C' :
@@ -107,3 +107,39 @@ var overlayMaps = {
 };
 
 L.control.layers(baseMaps, overlayMaps).addTo(myMap);
+
+var legend1 = L.control({position: 'bottomright'});
+
+legend1.onAdd = function (myMap) {
+
+    var div = L.DomUtil.create('div', 'info legend'),
+        grades = [0, 30000, 45000, 60000, 75000, 90000, 105000, 125000],
+        labels = ['0-30K','30K-45K','45K-60K','60K-75K','75k-90k','90k-105k','105k-125k','125k+'];
+
+    // loop through our density intervals and generate a label with a colored square for each interval
+    for (var i = 0; i < grades.length; i++) {
+        div.innerHTML +=
+            '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+            labels[i] + '<br>' + '<br>';
+            // grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+    }
+
+    return div;
+};
+
+legend1.addTo(myMap);
+
+myMap.on('overlayadd', function(eventLayer) {
+  if (eventLayer.name === 'employed') {
+    legend1.addTo(this);
+  }
+  else {
+    this.removeControl(legend1)
+  }
+});
+
+myMap.on('overlayremove', function(eventLayer) {
+  if (eventLayer.name === 'employed') {
+    this.removeControl(legend1);
+  }
+});
