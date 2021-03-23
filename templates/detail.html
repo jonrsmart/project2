@@ -37,6 +37,16 @@ function style(feature) {
       fillOpacity: 0.7
   };
 }
+function states(feature) {
+  return {
+      fillColor: getColor(feature.properties.AVE_POSTED_SAL),
+      weight: 2,
+      opacity: 1,
+      color: 'white',
+      dashArray: '3',
+      fillOpacity: 0.7
+  };
+}
 
 employed = L.geoJson(salary_data, {style: style});
 
@@ -82,7 +92,24 @@ function park_feature(feature, layer) {
   
 }
 
+var state_data = L.geoJson(states_data, {  
+  style: states,
+  onEachFeature: state_feature
 
+});
+function resetState(e) {
+  state_data.resetStyle(e.target);
+}
+function state_feature(feature, layer) {
+  layer.on({
+      mouseover: highlightFeature,
+      mouseout: resetState,
+      click: zoomToFeature
+  });
+  layer.bindPopup("<h1>State: <a href='/states/"+feature.properties.STATE+"'>" + feature.properties.NAME + "</a></h1><hr><h1>Average Est Salary: " +
+        "$" + feature.properties.AVE_POSTED_SAL + "</h1><hr>Cost of Living Index: "
+         + feature.properties.COST_OF_LIVING + "<hr> <h1>Total Data Analyst Job Postings: " + feature.properties.JOB_POSTINGS + "</h1>");
+}
 L.MakiMarkers.accessToken = API_KEY;
 var icon = L.MakiMarkers.icon({icon: "park", color: "#5f9120", size: "s"});
 
@@ -110,7 +137,7 @@ var grayscale = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}
 var myMap = L.map('state_map', {
   center: [lat, lon],
   zoom: 6,
-  layers: [grayscale, employed]
+  layers: [grayscale, state_data]
 });
 
 var baseMaps = {
@@ -119,8 +146,9 @@ var baseMaps = {
 };
 
 var overlayMaps = {
-  "Employed": employed,
-  "Parks": NPMap
+  "Salary Info": employed,
+  "Parks": NPMap,
+  "State": state_data
 };
 
 L.control.layers(baseMaps, overlayMaps).addTo(myMap);
@@ -147,16 +175,17 @@ legend1.onAdd = function (myMap) {
 legend1.addTo(myMap);
 
 myMap.on('overlayadd', function(eventLayer) {
-  if (eventLayer.name === 'Employed') {
+  if (eventLayer.name === 'Employed' || eventLayer.name === 'State') {
     legend1.addTo(this);
   }
+
   else {
     this.removeControl(legend1)
   }
 });
 
 myMap.on('overlayremove', function(eventLayer) {
-  if (eventLayer.name === 'Employed') {
+  if (eventLayer.name === 'Employed' || eventLayer.name === 'State') {
     this.removeControl(legend1);
   }
 });

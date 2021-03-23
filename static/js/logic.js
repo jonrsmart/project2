@@ -10,6 +10,8 @@ function getColor(d) {
   parseFloat(d) > 30000   ? '#FED976' :
                     '#FFFFFF';
 }
+
+
 function style(feature) {
   return {
       fillColor: getColor(feature.properties.a_mean),
@@ -21,7 +23,20 @@ function style(feature) {
   };
 }
 
-employed = L.geoJson(salary_data, {style: style});
+function states(feature) {
+  return {
+      fillColor: getColor(feature.properties.AVE_POSTED_SAL),
+      weight: 2,
+      opacity: 1,
+      color: 'white',
+      dashArray: '3',
+      fillOpacity: 0.7
+  };
+}
+
+// employed = L.geoJson(salary_data, {style: style});
+
+
 
 function highlightFeature(e) {
   var layer = e.target;
@@ -40,8 +55,27 @@ function highlightFeature(e) {
 
 function resetHighlight(e) {
   employed.resetStyle(e.target);
+  
 }
 
+var state_data = L.geoJson(states_data, {  
+  style: states,
+  onEachFeature: state_feature
+
+});
+function resetState(e) {
+  state_data.resetStyle(e.target);
+}
+function state_feature(feature, layer) {
+  layer.on({
+      mouseover: highlightFeature,
+      mouseout: resetState,
+      click: zoomToFeature
+  });
+  layer.bindPopup("<h1>State: <a href='/states/"+feature.properties.STATE+"'>" + feature.properties.NAME + "</a></h1><hr><h1>Average Est Salary: " +
+        "$" + feature.properties.AVE_POSTED_SAL + "</h1><hr>Cost of Living Index: "
+         + feature.properties.COST_OF_LIVING + "<hr> <h1>Total Data Analyst Job Postings: " + feature.properties.JOB_POSTINGS + "</h1>");
+}
 function zoomToFeature(e) {
   myMap.fitBounds(e.target.getBounds());
 }
@@ -102,8 +136,9 @@ var baseMaps = {
 };
 
 var overlayMaps = {
-  "Employed": employed,
-  "Parks": NPMap
+  "Salary Info": employed,
+  "Parks": NPMap,
+  "State": state_data
 };
 
 L.control.layers(baseMaps, overlayMaps).addTo(myMap);
@@ -130,16 +165,17 @@ legend1.onAdd = function (myMap) {
 legend1.addTo(myMap);
 
 myMap.on('overlayadd', function(eventLayer) {
-  if (eventLayer.name === 'employed') {
+  if (eventLayer.name === 'Employed' || eventLayer.name === 'State') {
     legend1.addTo(this);
   }
+
   else {
     this.removeControl(legend1)
   }
 });
 
 myMap.on('overlayremove', function(eventLayer) {
-  if (eventLayer.name === 'employed') {
+  if (eventLayer.name === 'Employed' || eventLayer.name === 'State') {
     this.removeControl(legend1);
   }
 });
