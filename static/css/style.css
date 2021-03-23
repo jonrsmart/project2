@@ -28,6 +28,24 @@ html {
     line-height: 18px;
     color: #555;
 }
+
+select {
+  display: block;
+}
+.bar {
+  fill: purple;
+  opacity: 0.8;
+}
+.state_table {  
+  height: 250px !important;
+  overflow: scroll;
+}
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
 .legend i {
     width: 18px;
     height: 18px;

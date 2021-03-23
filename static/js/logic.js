@@ -127,7 +127,7 @@ var grayscale = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}
 var myMap = L.map('map2', {
   center: [37.8, -96],
   zoom: 4,
-  layers: [grayscale, employed]
+  layers: [grayscale, state_data]
 });
 
 var baseMaps = {
@@ -165,17 +165,22 @@ legend1.onAdd = function (myMap) {
 legend1.addTo(myMap);
 
 myMap.on('overlayadd', function(eventLayer) {
-  if (eventLayer.name === 'Employed' || eventLayer.name === 'State') {
+  if (eventLayer.name === 'Salary Info' || eventLayer.name === 'State') {
     legend1.addTo(this);
   }
-
+  else if (eventLayer.name === 'Parks') {
+    this.removeControl(legend1);
+  }
   else {
-    this.removeControl(legend1)
+    this.removeControl(legend1);
   }
 });
 
 myMap.on('overlayremove', function(eventLayer) {
-  if (eventLayer.name === 'Employed' || eventLayer.name === 'State') {
+  if (eventLayer.name === 'Salary Info' || eventLayer.name === 'State') {
     this.removeControl(legend1);
+  }
+  else if (eventLayer.name === 'Parks') {
+    
   }
 });

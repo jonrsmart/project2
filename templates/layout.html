@@ -16,6 +16,8 @@
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="http://d3js.org/d3.v4.min.js" charset="utf-8"></script>
   </head>
 <body>
   
@@ -29,7 +31,11 @@
           <a class="nav-link" href="/">Home</span></a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="/states">State Information</a>
+          <a class="nav-link" href="/about">About</a>
+        </li>
+        {% block navlink %}{% endblock %}
+        <li class="nav-item">
+          <a class="nav-link" href="/states">All States Table</a>
         </li>
       </ul>
     </nav>
@@ -47,6 +53,29 @@
     
     <!-- Our JS -->
    {% block script %}{% endblock %}
-    
   </body>
+
+  <footer>
+  <div class="row">
+   <div class="col-12">
+   <br>
+   <br>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand" href="/">Data Analysts</a>
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/states">All States Table</a>
+        </li>
+      </ul>
+    </nav>
+    <br>
+    </div>
+    </div>
+    </footer>
 </html>

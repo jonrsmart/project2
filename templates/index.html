@@ -1,5 +1,15 @@
 {% extends 'layout.html' %}
-
+{% block navlink %}
+  <li class="nav-item dropdown">
+         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">
+          State<span class="caret"></span>
+        </a>
+      <div class="dropdown-menu">
+        {% for state in states %}
+        <a class="dropdown-item" href="/states/{{ state.FIPS }}">{{ state.State }}</a>
+        {% endfor %}
+  </li>
+{% endblock %}
 {% block headline %}
   There are {{total}} Employed Data Analysts in the USA 
 {% endblock %}
@@ -8,26 +18,23 @@
   It's pretty cool.
 {% endblock %}
 {% block content %}
-<div class="container-fluid">
-  <div class="row-fluid">
-    <div class="col-3">
-      <h1>Pick a State, any State!</h1>
-      <div class="dropdown">
+<div class="container">
+  <div class="row">
+  <div class="col-10 mx-auto">
+        <h1>Pick a State, any State!
+        <div class="dropdown">
          <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
           States<span class="caret"></span>
-        </button>
-      <div class="dropdown-menu">
-        {% for state in states %}
-        <a class="dropdown-item" href="/states/{{ state.FIPS }}">{{ state.State }}</a>
-        {% endfor %}
-      </div>
-</div>
-  
-  </div>
-  <div class="col-6 mx-auto">
+            </button>
+          <div class="dropdown-menu">
+            {% for state in states %}
+            <a class="dropdown-item" href="/states/{{ state.FIPS }}">{{ state.State }}</a>
+            {% endfor %}
+          </div>
+        </div>
+      </h1>
   <div id='map2'></div>
   </div>
-  <div class="col-3"><p>     </p></div>
   </div> 
    
 </div>

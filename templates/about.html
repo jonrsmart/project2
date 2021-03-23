@@ -1,0 +1,33 @@
+{% extends 'layout.html' %}
+{% block navlink %}
+  <li class="nav-item dropdown">
+         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">
+          State<span class="caret"></span>
+        </a>
+      <div class="dropdown-menu">
+        {% for state in states %}
+        <a class="dropdown-item" href="/states/{{ state.FIPS }}">{{ state.State }}</a>
+        {% endfor %}
+  </li>
+{% endblock %}
+{% block headline %}
+  About our CWRU Project
+{% endblock %}
+
+{% block subhead %}
+  Where should we set up shop?
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-6">
+            <p>This is some text</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            <p>This is some text</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

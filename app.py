@@ -32,9 +32,9 @@ class Salary(db.Model):
 
 @app.route('/states/<slug>')
 def detail(slug):
-    print(slug)
+    state_names = States.query.all()
     state = States.query.filter_by(FIPS=slug).first()
-    return render_template("detail.html", state=state)
+    return render_template("detail.html", state=state, states=state_names)
 
 @app.route("/")
 def index():
@@ -43,6 +43,14 @@ def index():
     result = Salary.query.with_entities(func.sum(Salary.tot_emp).label("TotalEmployed")).first()
     total = int(result.TotalEmployed)
     return render_template("index.html", states=state_names, total=total)
+
+@app.route("/about")
+def about():
+    state_names = States.query.all()
+    print(state_names)
+    result = Salary.query.with_entities(func.sum(Salary.tot_emp).label("TotalEmployed")).first()
+    total = int(result.TotalEmployed)
+    return render_template("about.html", states=state_names, total=total)
 
 @app.route('/states')
 def county_list():
