@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "d3-geo": "^2.0.1",
+    "markdown-json": "^1.5.1"
+  }
+}
